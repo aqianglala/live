@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.pili.pldroid.streaming.camera.demo.Config;
-import com.pili.pldroid.streaming.camera.demo.HWCodecCameraStreamingActivity;
+//import com.pili.pldroid.streaming.camera.demo.HWCodecCameraStreamingActivity;
 import com.pili.pldroid.streaming.camera.demo.R;
 
 public class MainActivity extends Activity {
@@ -89,14 +89,14 @@ public class MainActivity extends Activity {
         if (!isSupportHWEncode()) {
             mHWCodecCameraStreamingBtn.setVisibility(View.INVISIBLE);
         }
-        mHWCodecCameraStreamingBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Intent intent = new Intent(MainActivity.this, HWCodecCameraStreamingActivity.class);
-//                startStreamingActivity(intent);
-                validateUrl( HWCodecCameraStreamingActivity.class);
-            }
-        });
+//        mHWCodecCameraStreamingBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                Intent intent = new Intent(MainActivity.this, HWCodecCameraStreamingActivity.class);
+////                startStreamingActivity(intent);
+//                validateUrl( HWCodecCameraStreamingActivity.class);
+//            }
+//        });
 
         Button mSWCodecCameraStreamingBtn = (Button) findViewById(R.id.sw_codec_camera_streaming_btn);
         mSWCodecCameraStreamingBtn.setOnClickListener(new View.OnClickListener() {
@@ -108,15 +108,15 @@ public class MainActivity extends Activity {
             }
         });
 
-        Button mAudioStreamingBtn = (Button) findViewById(R.id.start_pure_audio_streaming_btn);
-        mAudioStreamingBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Intent intent = new Intent(MainActivity.this, AudioStreamingActivity.class);
-//                startStreamingActivity(intent);
-                validateUrl( AudioStreamingActivity.class);
-            }
-        });
+//        Button mAudioStreamingBtn = (Button) findViewById(R.id.start_pure_audio_streaming_btn);
+//        mAudioStreamingBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                Intent intent = new Intent(MainActivity.this, AudioStreamingActivity.class);
+////                startStreamingActivity(intent);
+//                validateUrl( AudioStreamingActivity.class);
+//            }
+//        });
 
         Button btn_receive = (Button) findViewById(R.id.btn_receive);
         btn_receive.setOnClickListener(new View.OnClickListener() {

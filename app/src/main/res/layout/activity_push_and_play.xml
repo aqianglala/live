@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.pili.pldroid.streaming.camera.demo.activity.PushAndPlayActivity">
+
+    <com.zhy.autolayout.AutoRelativeLayout
+        android:id="@+id/aspect_layout"
+        android:layout_width="match_parent"
+        android:layout_height="640px">
+
+        <com.pili.pldroid.player.widget.VideoView
+            android:id="@+id/video_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            />
+
+        <com.pili.pldroid.streaming.widget.AspectFrameLayout
+            android:id="@+id/cameraPreview_afl"
+            android:layout_width="264px"
+            android:layout_height="220px"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true">
+
+            <com.pili.pldroid.streaming.camera.demo.CameraPreviewFrameView
+                android:id="@+id/cameraPreview_surfaceView"
+                android:layout_width="264px"
+                android:layout_height="220px"
+                android:layout_gravity="center" />
+
+        </com.pili.pldroid.streaming.widget.AspectFrameLayout>
+    </com.zhy.autolayout.AutoRelativeLayout>
+
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <EditText
+            android:id="@+id/et_play"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="播放地址"
+            />
+
+        <Button
+            android:id="@+id/btn_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="播放"
+            />
+    </com.zhy.autolayout.AutoLinearLayout>
+
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <EditText
+            android:id="@+id/et_push"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="播放地址"
+            />
+
+        <Button
+            android:id="@+id/btn_push"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="推流"
+            />
+    </com.zhy.autolayout.AutoLinearLayout>
+
+</com.zhy.autolayout.AutoLinearLayout>

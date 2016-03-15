@@ -1,7 +1,6 @@
 package com.pili.pldroid.streaming.camera.demo.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -9,21 +8,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pili.pldroid.streaming.CameraStreamingManager;
-import com.pili.pldroid.streaming.SharedLibraryNameHelper;
-import com.pili.pldroid.streaming.StreamingProfile;
-import com.pili.pldroid.streaming.camera.demo.CameraPreviewFrameView;
 import com.pili.pldroid.streaming.camera.demo.Config;
 import com.pili.pldroid.streaming.camera.demo.R;
 import com.pili.pldroid.streaming.camera.demo.ui.RotateLayout;
+import com.pili.pldroid.streaming.camera.demo.utils.StreamJsonUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,9 +27,8 @@ import java.util.List;
  * Created by jerikc on 15/7/6.
  */
 public class StreamingBaseActivity extends Activity implements
-        CameraPreviewFrameView.Listener,
-        CameraStreamingManager.StreamingSessionListener,
-        CameraStreamingManager.StreamingStateListener {
+        CameraStreamingManager.StreamingSessionListener
+         {
 
     private static final String TAG = "StreamingBaseActivity";
 
@@ -76,27 +68,21 @@ public class StreamingBaseActivity extends Activity implements
                         @Override
                         public void run() {
                             // disable the shutter button before startStreaming
-                            setShutterButtonEnabled(false);
                             boolean res = mCameraStreamingManager.startStreaming();
                             mShutterButtonPressed = true;
                             Log.i(TAG, "res:" + res);
                             if (!res) {
                                 mShutterButtonPressed = false;
-                                setShutterButtonEnabled(true);
                             }
-                            setShutterButtonPressed(mShutterButtonPressed);
                         }
                     }).start();
                     break;
                 case MSG_STOP_STREAMING:
                     // disable the shutter button before stopStreaming
-                    setShutterButtonEnabled(false);
                     boolean res = mCameraStreamingManager.stopStreaming();
                     if (!res) {
                         mShutterButtonPressed = true;
-                        setShutterButtonEnabled(true);
                     }
-                    setShutterButtonPressed(mShutterButtonPressed);
                     break;
                 case MSG_SET_ZOOM:
                     mCameraStreamingManager.setZoomValue(mCurrentZoom);
@@ -104,7 +90,6 @@ public class StreamingBaseActivity extends Activity implements
                 case MSG_MUTE:
                     mIsNeedMute = !mIsNeedMute;
                     mCameraStreamingManager.mute(mIsNeedMute);
-                    updateMuteButtonText();
                     break;
                 default:
                     Log.e(TAG, "Invalid message");
@@ -125,7 +110,7 @@ public class StreamingBaseActivity extends Activity implements
         }
         setRequestedOrientation(Config.SCREEN_ORIENTATION);
 
-        setContentView(R.layout.activity_camera_streaming);
+        setContentView(R.layout.activity_push_and_play);
 //
 //        SharedLibraryNameHelper.getInstance().renameSharedLibrary(
 //                SharedLibraryNameHelper.PLSharedLibraryType.PL_SO_TYPE_AAC,
@@ -136,25 +121,13 @@ public class StreamingBaseActivity extends Activity implements
 //
 //        SharedLibraryNameHelper.getInstance().renameSharedLibrary(
 //                SharedLibraryNameHelper.PLSharedLibraryType.PL_SO_TYPE_H264, "pldroid_streaming_h264_encoder_v7a");
-
-        String streamJsonStrFromServer = getIntent().getStringExtra(Config.EXTRA_KEY_STREAM_JSON);
-
+        String streamJson = StreamJsonUtils.createStreamJson("rtmp://192.168.1.112/live/123");
         try {
-            mJSONObject = new JSONObject(streamJsonStrFromServer);
+            mJSONObject = new JSONObject(streamJson);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        mMuteButton = (Button) findViewById(R.id.mute_btn);
-        mMuteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mHandler.hasMessages(MSG_MUTE)) {
-                    mHandler.sendEmptyMessage(MSG_MUTE);
-                }
-            }
-        });
-        updateMuteButtonText();
     }
 
     @Override
@@ -168,7 +141,6 @@ public class StreamingBaseActivity extends Activity implements
         super.onPause();
 
         mIsReady = false;
-        mShutterButtonPressed = false;
         mCameraStreamingManager.pause();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -179,88 +151,6 @@ public class StreamingBaseActivity extends Activity implements
         mCameraStreamingManager.destroy();
     }
 
-    @Override
-    public void onStateChanged(final int state, Object extra) {
-        Log.i(TAG, "onStateChanged state:" + state);
-        switch (state) {
-            case CameraStreamingManager.STATE.PREPARING:
-                mStatusMsgContent = getString(R.string.string_state_preparing);
-                break;
-            case CameraStreamingManager.STATE.READY:
-                mIsReady = true;
-                mMaxZoom = mCameraStreamingManager.getMaxZoom();
-                mStatusMsgContent = getString(R.string.string_state_ready);
-                // start streaming when READY
-                startStreaming();
-                break;
-            case CameraStreamingManager.STATE.CONNECTING:
-                mStatusMsgContent = getString(R.string.string_state_connecting);
-                break;
-            case CameraStreamingManager.STATE.STREAMING:
-                mStatusMsgContent = getString(R.string.string_state_streaming);
-                setShutterButtonEnabled(true);
-                setShutterButtonPressed(true);
-                break;
-            case CameraStreamingManager.STATE.SHUTDOWN:
-                mStatusMsgContent = getString(R.string.string_state_ready);
-                setShutterButtonEnabled(true);
-                setShutterButtonPressed(false);
-                break;
-            case CameraStreamingManager.STATE.IOERROR:
-                mLogContent += "IOERROR\n";
-                mStatusMsgContent = getString(R.string.string_state_ready);
-                setShutterButtonEnabled(true);
-                break;
-            case CameraStreamingManager.STATE.UNKNOWN:
-                mStatusMsgContent = getString(R.string.string_state_ready);
-                break;
-            case CameraStreamingManager.STATE.SENDING_BUFFER_EMPTY:
-                break;
-            case CameraStreamingManager.STATE.SENDING_BUFFER_FULL:
-                break;
-            case CameraStreamingManager.STATE.AUDIO_RECORDING_FAIL:
-                break;
-            case CameraStreamingManager.STATE.OPEN_CAMERA_FAIL:
-                Log.e(TAG, "Open Camera Fail. id:" + extra);
-                break;
-            case CameraStreamingManager.STATE.DISCONNECTED:
-                mLogContent += "DISCONNECTED\n";
-                break;
-        }
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mSatusTextView.setText(mStatusMsgContent);
-            }
-        });
-    }
-
-    @Override
-    public boolean onStateHandled(final int state, Object extra) {
-        Log.i(TAG, "onStateHandled state:" + state);
-        return false;
-    }
-
-    protected void setShutterButtonPressed(final boolean pressed) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mShutterButtonPressed = pressed;
-                mShutterButton.setPressed(pressed);
-            }
-        });
-    }
-
-    protected void setShutterButtonEnabled(final boolean enable) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mShutterButton.setFocusable(enable);
-                mShutterButton.setClickable(enable);
-                mShutterButton.setEnabled(enable);
-            }
-        });
-    }
 
     protected void startStreaming() {
         mHandler.removeCallbacksAndMessages(null);
@@ -297,45 +187,4 @@ public class StreamingBaseActivity extends Activity implements
         return size;
     }
 
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        Log.i(TAG, "onSingleTapUp X:" + e.getX() + ",Y:" + e.getY());
-
-        if (mIsReady) {
-            setFocusAreaIndicator();
-            mCameraStreamingManager.doSingleTapUp((int) e.getX(), (int) e.getY());
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onZoomValueChanged(float factor) {
-        if (mIsReady && mCameraStreamingManager.isZoomSupported()) {
-            mCurrentZoom = (int) (mMaxZoom * factor);
-            mCurrentZoom = Math.min(mCurrentZoom, mMaxZoom);
-            mCurrentZoom = Math.max(0, mCurrentZoom);
-
-            Log.d(TAG, "zoom ongoing, scale: " + mCurrentZoom + ",factor:" + factor + ",maxZoom:" + mMaxZoom);
-            if (!mHandler.hasMessages(MSG_SET_ZOOM)) {
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SET_ZOOM), ZOOM_MINIMUM_WAIT_MILLIS);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected void setFocusAreaIndicator() {
-        if (mRotateLayout == null) {
-            mRotateLayout = (RotateLayout)findViewById(R.id.focus_indicator_rotate_layout);
-            mCameraStreamingManager.setFocusAreaIndicator(mRotateLayout,
-                    mRotateLayout.findViewById(R.id.focus_indicator));
-        }
-    }
-
-    private void updateMuteButtonText() {
-        if (mMuteButton != null) {
-            mMuteButton.setText(mIsNeedMute ? "unmute" : "mute");
-        }
-    }
 }

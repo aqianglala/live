@@ -52,6 +52,7 @@ public class VideoPlayerActivity extends Activity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 添加屏幕锁，只要窗口对用户可见，设备屏幕会保持开的状态
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_player);
 
